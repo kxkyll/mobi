@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MyLocationService</string>
+    <string name="notify_started">MyLocationService started</string>
+    <string name="notify_stopped">MyLocationService stopped</string>
+
+    <string name="permgrplabel_aggregated_location">Aggregated location</string>
+    <string name="permgrpdesc_aggregated_location">Aggregated location information</string>
+    <string name="permlabel_access_aggregated_location">Aggregated location</string>
+    <string name="permdesc_access_aggregated_location">Allows the app to access aggregated, up to street level information regarding your whereabouts</string>
+</resources>

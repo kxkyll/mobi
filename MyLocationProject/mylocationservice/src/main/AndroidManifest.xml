@@ -1,0 +1,28 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="fi.aalto.cs.mss.mylocationservice">
+
+    <meta-data android:name="com.google.android.gms.version"
+        android:value="@integer/google_play_services_version" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+    <permission-group android:label="@string/permgrplabel_aggregated_location"
+        android:description="@string/permgrpdesc_aggregated_location"
+        android:name="fi.aalto.cs.mss.permission-group.AGGREGATED_LOCATION" />
+
+    <permission android:name="fi.aalto.cs.mss.permission.ACCESS_AGGREGATED_LOCATION"
+        android:label="@string/permlabel_access_aggregated_location"
+        android:description="@string/permdesc_access_aggregated_location"
+        android:permissionGroup="fi.aalto.cs.mss.permission-group.AGGREGATED_LOCATION"
+        android:protectionLevel="dangerous" />
+
+    <application android:allowBackup="true" android:label="@string/app_name"
+        android:icon="@drawable/ic_launcher" android:theme="@style/AppTheme">
+
+        <service android:name=".MyLocationService"
+            android:exported="true"
+            android:permission="fi.aalto.cs.mss.permission.ACCESS_AGGREGATED_LOCATION"/>
+
+    </application>
+
+</manifest>

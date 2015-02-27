@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">MyLocationApp</string>
+    <string name="action_settings">Settings</string>
+    <string name="field_locality_label">Current location</string>
+    <string name="field_locality_default">Location information not available</string>
+
+</resources>

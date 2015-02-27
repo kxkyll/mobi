@@ -1,0 +1,42 @@
+Programming assignment 2
+========================
+
+a) Write an Android application containing a Service component, which provides
+the address of the current location to its clients. Clients should be able to
+register to receive location updates, which the service should deliver
+periodically until the client unregisters. The Service should declare a new
+permission, which clients are required to to have in order to receive location
+updates. The Service should be able to service multiple clients, but may queue
+the service requests and handle them one by one.
+
+Given these requirements, consider what is the most appropriate lifecycle for
+the Service and IPC mechanism to use in communication with clients.
+
+Hint: The MyAbstractLocationService class provided implements a Google Play
+services API client, which registers the receive peridic location updates in
+the form of GPS coordinatesou can subclass MyAbstractionLocationService and
+obtain the current address by performing reverse GeoCoding of current
+coordinates.
+
+The periodic location updates are delivered via the onLocationChanged(Location)
+callback, which the subclass should implement. Alternatively, the latest
+location coordinates can be obtained by calling:
+
+com.google.android.gms.location.LocationServices.FusedLocationApi.getLastLocation()
+
+and passing the mGoogleApiClient member inherited from the abstract location
+service class as argument. The Service must have the appropriate permissions to
+access the current location.
+
+b) Write a client application which displays the current address to the user.
+The client application should not have the permissions to access the current
+GPS coordinates by itself, but must obtain the current address from the Service
+written in step (a). To do so, it must be assigned the permission declared in (a).
+
+Hint: In order to test your application, you can use the attached GPS trace to
+provide mock GPS locations to the Android emulator. Instructions on how to use
+GPS traces with the emulator can be found on the course wiki. 
+
+Attachments: <MyAbstractLocationService.java>
+             <helsinki-espoo-roundtrip.gpx>
+
