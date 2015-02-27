@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import fi.aalto.cs.mss.mylocationcommon.MyLocationCommon;
 import fi.aalto.cs.mss.mylocationapp.R;
+import fi.aalto.mss.mylocationcommon.IMyLocationServiceInterface;
 
 /**
  * Example of binding and unbinding to the remote service. This demonstrates the
@@ -41,11 +42,13 @@ import fi.aalto.cs.mss.mylocationapp.R;
  * it through a Messenger interface.</p>
  */
 public class MyLocationActivity extends Activity {
+    IMyLocationServiceInterface mService;
+
 
     private static final String TAG = "MyLocationApp";
 
     /** Messenger for communicating with service. */
-    private Messenger mService = null;
+    //private Messenger mService = null;
 
     /** Flag indicating whether we have called bind on the service. */
     private boolean mIsBound;
@@ -53,10 +56,32 @@ public class MyLocationActivity extends Activity {
     /** Some text view we are using to show state information. */
     private TextView mCallbackText;
 
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mService = IMyLocationServiceInterface.Stub.asInterface(service);
+            mIsBound = true;
+            String location = getString(R.string.field_locality_default);
+            try {
+                location = mService.locationRequest();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            mCallbackText.setText(location);
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+            mIsBound = false;
+        }
+    };
+
     /**
      * Handler of incoming messages from service.
      */
-    class IncomingHandler extends Handler {
+    /*class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -78,16 +103,17 @@ public class MyLocationActivity extends Activity {
             }
         }
     }
-
+*/
     /**
      * Target published for clients to send messages to IncomingHandler.
      */
-    private final Messenger mMessenger = new Messenger(new IncomingHandler());
+   // private final Messenger mMessenger = new Messenger(new IncomingHandler());
+
 
     /**
      * Class for interacting with the main interface of the service.
      */
-    private final ServiceConnection mConnection = new ServiceConnection() {
+    /*private final ServiceConnection mConnection = new ServiceConnection() {
         /*
          * This is called when the connection with the service has been
          * established, giving us the service object we can use to interact with
@@ -95,7 +121,7 @@ public class MyLocationActivity extends Activity {
          * interface, so get a client-side representation of that from the raw
          * service object.
          */
-        @Override
+      /*  @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             mService = new Messenger(service);
             Log.d(TAG, "Connected to location service");
@@ -119,18 +145,19 @@ public class MyLocationActivity extends Activity {
                  * (and then reconnected if it can be restarted) so there is no
                  * need to do anything here.
                  */
-            }
+/*            }
         }
-
+*/
         /*
          * This is called when the connection with the service has been
          * unexpectedly disconnected -- that is, its process crashed.
          */
-        @Override
+/*        @Override
         public void onServiceDisconnected(ComponentName className) {
             mService = null;
         }
     };
+*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -216,7 +243,7 @@ public class MyLocationActivity extends Activity {
              * If we have received the service, and hence registered with it,
              * then now is the time to unregister.
              */
-            if (mService != null) {
+            /*if (mService != null) {
                 try {
                     Message msg = Message.obtain(null, MyLocationCommon.MSG_UNREGISTER_CLIENT);
                     msg.replyTo = mMessenger;
@@ -227,12 +254,14 @@ public class MyLocationActivity extends Activity {
                     // crashed.
                 }
             }
-
+            */
             // Detach our existing connection.
             unbindService(mConnection);
             mIsBound = false;
         }
     }
+
+
 
     /*
      * Format the address lines (if available), thoroughfare, sub-administrative

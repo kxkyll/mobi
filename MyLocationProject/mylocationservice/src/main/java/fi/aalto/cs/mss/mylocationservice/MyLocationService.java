@@ -38,8 +38,16 @@ import com.google.android.gms.location.LocationServices;
 
 import fi.aalto.cs.mss.mylocationcommon.MyLocationCommon;
 import fi.aalto.cs.mss.mylocationservice.MyAbstractLocationService;
+import fi.aalto.mss.mylocationcommon.IMyLocationServiceInterface;
 
 public class MyLocationService extends MyAbstractLocationService {
+
+    private IMyLocationServiceInterface.Stub mBinder = new IMyLocationServiceInterface.Stub() {
+        public String locationRequest() {
+            return "huuhaa";
+        }
+    };
+
 
     // Tag used for log message
     private static final String TAG = "MyLocationService";
@@ -132,8 +140,9 @@ public class MyLocationService extends MyAbstractLocationService {
      */
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(TAG, "Location client bound to service");
-        return mMessenger.getBinder();
+        Log.d(TAG, "Location client bound to service, returning aidl binder");
+        //return mMessenger.getBinder();
+        return mBinder;
     }
 
     /*
