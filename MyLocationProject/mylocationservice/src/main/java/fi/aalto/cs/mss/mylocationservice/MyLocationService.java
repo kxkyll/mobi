@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -36,6 +37,7 @@ import java.util.Locale;
 
 import com.google.android.gms.location.LocationServices;
 
+import fi.aalto.cs.mss.mylocationcommon.LocationClient;
 import fi.aalto.cs.mss.mylocationcommon.MyLocationCommon;
 import fi.aalto.cs.mss.mylocationservice.MyAbstractLocationService;
 import fi.aalto.mss.mylocationcommon.IMyLocationListener;
@@ -47,7 +49,7 @@ public class MyLocationService extends MyAbstractLocationService {
     private static final String TAG = "MyLocationService";
 
     /** List used to keep track of all current registered clients. */
-    protected final ArrayList<Messenger> mClients = new ArrayList<Messenger>();
+    //protected final ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 
     /** Holds the address indicated by the last location change */
     protected Address mAddress;
@@ -59,6 +61,13 @@ public class MyLocationService extends MyAbstractLocationService {
     private Geocoder geocoder;
 
     private List<IMyLocationListener> listeners = new ArrayList<IMyLocationListener>();
+    private List<LocationClient> locationListeners = new ArrayList<LocationClient>();
+    private List<Integer> fineGrainListed = new ArrayList<Integer>();
+
+
+    private void initializeFineGrainListed() {
+        fineGrainListed.add(10066);
+    }
 
     private IMyLocationServiceInterface.Stub mBinder = new IMyLocationServiceInterface.Stub() {
 
@@ -69,7 +78,7 @@ public class MyLocationService extends MyAbstractLocationService {
                         mGoogleApiClient);
                 updateCurrentLocation(location);
             }
-            if (isClientFineGradeListed()){
+            if (isClientFineGradeListed(Binder.getCallingPid())){
                 Log.d(TAG, "sending location as response to locationRequest "+fineGrainAddressText.toString());
                 return fineGrainAddressText.toString();
             }else {
@@ -79,23 +88,38 @@ public class MyLocationService extends MyAbstractLocationService {
 
         }
         public void registerLocationListener(IMyLocationListener mlistener){
-            listeners.add(mlistener);
-            Log.d(TAG, "listeners has this many listeners: " +listeners.size());
+
+            int callingUid = Binder.getCallingUid();
+            LocationClient client = new LocationClient(mlistener, callingUid);
+            locationListeners.add(client);
+            //listeners.add(mlistener);
+            Log.d(TAG, "locationListeners has this many listeners: " +locationListeners.size());
+            Log.d(TAG, "Binder.getCallingUid returned: "+callingUid);
+
 
         }
         public void unregisterLocationListener(IMyLocationListener mlistener){
-            if (listeners.contains(mlistener)) {
-                listeners.remove(mlistener);
+            if (mlistener == null){
+                return;
             }
+            LocationClient removeThis =  null;
+            for (LocationClient client: locationListeners){
+                if (client.listener.equals(mlistener)) {
+                    removeThis = client;
+                }
+            }
+            if (removeThis != null){
+                locationListeners.remove(removeThis);
+            }
+
         }
-
-
 
     };
 
 
-    private boolean isClientFineGradeListed() {
-        return false;
+    private boolean isClientFineGradeListed(int listenerUid) {
+        return fineGrainListed.contains(listenerUid);
+
     }
 
     /**
@@ -109,6 +133,7 @@ public class MyLocationService extends MyAbstractLocationService {
         super.onCreate();
         fineGrainAddressText.append("Seeking exact location");
         coarseGrainAddressText.append("Seeking city location");
+        initializeFineGrainListed();
 
         // Initialize Geocoder instance used retrieve the the current address
         geocoder = new Geocoder(this, Locale.getDefault());
@@ -180,13 +205,37 @@ public class MyLocationService extends MyAbstractLocationService {
     }
 
 
-
-
     /**
      * Send location update to clients.
      */
 
     private void sendLocationUpdate(){
+        Log.d(TAG, "-------------------sendLocationUpdate------------------------ ");
+        for (LocationClient locationListener: locationListeners){
+            Log.d(TAG, "-------------------sending to all listeners--------------------- ");
+            try {
+                String sfine = fineGrainAddressText.toString();
+                String scoarse = coarseGrainAddressText.toString();
+                Log.e(TAG, "--------------------locationListener uid:  " + locationListener.listenerUid);
+                Log.e(TAG, "------fineGrainlist contains:--------------" + fineGrainListed.get(0));
+                if (isClientFineGradeListed(locationListener.listenerUid)) {
+                    Log.e(TAG, "--------------------sending fine grained location to client " + sfine);
+
+                    locationListener.listener.handleChangedLocation(sfine);
+
+                }else {
+                    Log.e(TAG, "--------------------sending coarse grained location to client " + scoarse);
+                    locationListener.listener.handleChangedLocation(scoarse);
+
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    /*private void sendLocationUpdate(){
         Log.d(TAG, "-------------------sendLocationUpdate------------------------ ");
         for (IMyLocationListener listener: listeners){
             Log.d(TAG, "-------------------sending to all listeners--------------------- ");
@@ -208,7 +257,7 @@ public class MyLocationService extends MyAbstractLocationService {
             }
         }
     }
-
+*/
     /*
      * Format the address lines (if available), thoroughfare, sub-administrative
      * area and country name.
