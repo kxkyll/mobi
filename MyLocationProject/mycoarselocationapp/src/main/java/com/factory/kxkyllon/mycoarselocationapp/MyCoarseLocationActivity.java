@@ -1,48 +1,27 @@
-/*
- * Copyright (C) 2013 University of Helsinki
- * Copyright (C) 2015 Aalto University
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package fi.aalto.cs.mss.mylocationapp;
+package com.factory.kxkyllon.mycoarselocationapp;
 
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.location.Address;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import fi.aalto.cs.mss.mylocationcommon.MyLocationCommon;
-import fi.aalto.cs.mss.mylocationapp.R;
+import com.factory.kxkyllon.mycoarselocationapp.R;
 import fi.aalto.mss.mylocationcommon.IMyLocationListener;
 import fi.aalto.mss.mylocationcommon.IMyLocationServiceInterface;
 
-/**
- * Example of binding and unbinding to the remote service. This demonstrates the
- * implementation of a service which the client will bind to, interacting with
- * it through a Messenger interface.</p>
- */
-public class MyLocationActivity extends Activity {
+
+public class MyCoarseLocationActivity extends Activity {
 
     private IMyLocationServiceInterface mService;
 
@@ -60,14 +39,14 @@ public class MyLocationActivity extends Activity {
     private Handler handler;
 
     private String currentLocation = "no location yet";
-            //getString(R.string.field_locality_default);
+    //getString(R.string.field_locality_default);
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mService = IMyLocationServiceInterface.Stub.asInterface(service);
             mIsBound = true;
-            currentLocation = getString(R.string.field_locality_default);
+            currentLocation = getString(R.string.location_default);
 
             try {
                 currentLocation = mService.locationRequest();
@@ -92,7 +71,7 @@ public class MyLocationActivity extends Activity {
 
         @Override
         public void handleChangedLocation(String newLocation) throws RemoteException {
-            Log.d(TAG, "handleChangedLocation ----------- newLocation: " +newLocation);
+            Log.d(TAG, "handleChangedLocation ----------- newLocation: " + newLocation);
             if (newLocation.length()>0) {
                 Log.d(TAG, "Updating location--------------------------" );
                 currentLocation = newLocation;
@@ -119,11 +98,38 @@ public class MyLocationActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my_location);
-        handler = new Handler();
+        setContentView(R.layout.activity_my_coarse_location);
 
-        mCallbackText = (TextView) findViewById(R.id.field_locality);
+        handler = new Handler();
+        mCallbackText = (TextView) findViewById(R.id.field_location);
+
     }
+
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_my_coarse_location, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 
     /*
      * We only need to interact with the service while our activity is visible,
@@ -207,6 +213,7 @@ public class MyLocationActivity extends Activity {
             mIsBound = false;
         }
     }
+
 
 
 }

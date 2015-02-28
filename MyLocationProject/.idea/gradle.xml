@@ -9,6 +9,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/mycoarselocationapp" />
             <option value="$PROJECT_DIR$/mylocationapp" />
             <option value="$PROJECT_DIR$/mylocationcommon" />
             <option value="$PROJECT_DIR$/mylocationservice" />

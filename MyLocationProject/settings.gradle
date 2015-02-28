@@ -1,1 +1,1 @@
-include ':mylocationcommon', ':mylocationservice', ':mylocationapp'
+include ':mylocationcommon', ':mylocationservice', ':mylocationapp', ':mycoarselocationapp'
