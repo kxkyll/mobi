@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import fi.aalto.cs.mss.mylocationcommon.MyLocationCommon;
 import fi.aalto.cs.mss.mylocationapp.R;
+import fi.aalto.mss.mylocationcommon.IMyLocationListener;
 import fi.aalto.mss.mylocationcommon.IMyLocationServiceInterface;
 
 /**
@@ -42,7 +43,7 @@ import fi.aalto.mss.mylocationcommon.IMyLocationServiceInterface;
  * it through a Messenger interface.</p>
  */
 public class MyLocationActivity extends Activity {
-    IMyLocationServiceInterface mService;
+    private IMyLocationServiceInterface mService;
 
 
     private static final String TAG = "MyLocationApp";
@@ -56,18 +57,27 @@ public class MyLocationActivity extends Activity {
     /** Some text view we are using to show state information. */
     private TextView mCallbackText;
 
+    private Handler handler;
+
+    private String currentLocation = "no location yet";
+            //getString(R.string.field_locality_default);
+
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mService = IMyLocationServiceInterface.Stub.asInterface(service);
             mIsBound = true;
-            String location = getString(R.string.field_locality_default);
+            currentLocation = getString(R.string.field_locality_default);
+
             try {
-                location = mService.locationRequest();
+                currentLocation = mService.locationRequest();
+                mService.registerLocationListener(serviceListener);
+
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            mCallbackText.setText(location);
+            mCallbackText.setText(currentLocation);
+
 
         }
 
@@ -77,6 +87,33 @@ public class MyLocationActivity extends Activity {
             mIsBound = false;
         }
     };
+
+    private IMyLocationListener.Stub serviceListener = new IMyLocationListener.Stub() {
+
+        @Override
+        public void handleChangedLocation(String newLocation) throws RemoteException {
+            Log.d(TAG, "handleChangedLocation ----------- newLocation: " +newLocation);
+            if (newLocation.length()>0) {
+                Log.d(TAG, "Updating location--------------------------" );
+                //mCallbackText.setText(newLocation);
+                currentLocation = newLocation;
+                updateView();
+            }
+
+        }
+    };
+
+    private void updateView(){
+        Log.d(TAG, "Updating view--------------------------" );
+        handler.post(new Runnable(){
+            @Override
+            public void run(){
+                Log.d(TAG, "Handler at work-------------------------" );
+                mCallbackText.setText(currentLocation);
+            }
+
+        });
+    }
 
     /**
      * Handler of incoming messages from service.
@@ -163,6 +200,7 @@ public class MyLocationActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_location);
+        handler = new Handler();
 
         mCallbackText = (TextView) findViewById(R.id.field_locality);
     }
@@ -184,6 +222,11 @@ public class MyLocationActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
+        try {
+            mService.unregisterLocationListener(serviceListener);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         doUnbindService();
         Log.d(TAG, "Unbinding from location service");
     }

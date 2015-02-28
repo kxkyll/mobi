@@ -38,6 +38,7 @@ import com.google.android.gms.location.LocationServices;
 
 import fi.aalto.cs.mss.mylocationcommon.MyLocationCommon;
 import fi.aalto.cs.mss.mylocationservice.MyAbstractLocationService;
+import fi.aalto.mss.mylocationcommon.IMyLocationListener;
 import fi.aalto.mss.mylocationcommon.IMyLocationServiceInterface;
 
 public class MyLocationService extends MyAbstractLocationService {
@@ -57,7 +58,10 @@ public class MyLocationService extends MyAbstractLocationService {
     /** Geocoder instance used to perform reverse geocoding */
     private Geocoder geocoder;
 
+    private List<IMyLocationListener> listeners = new ArrayList<IMyLocationListener>();
+
     private IMyLocationServiceInterface.Stub mBinder = new IMyLocationServiceInterface.Stub() {
+
         public String locationRequest() {
             if (mGoogleApiClient.isConnected()) {
                 Log.d(TAG, "Google Api Client is connected");
@@ -66,12 +70,27 @@ public class MyLocationService extends MyAbstractLocationService {
                 updateCurrentLocation(location);
             }
             if (isClientFineGradeListed()){
+                Log.d(TAG, "sending location as response to locationRequest "+fineGrainAddressText.toString());
                 return fineGrainAddressText.toString();
             }else {
+                Log.d(TAG, "sending location as response to locationRequest "+coarseGrainAddressText.toString());
                 return coarseGrainAddressText.toString();
             }
 
         }
+        public void registerLocationListener(IMyLocationListener mlistener){
+            listeners.add(mlistener);
+            Log.d(TAG, "listeners has this many listeners: " +listeners.size());
+
+        }
+        public void unregisterLocationListener(IMyLocationListener mlistener){
+            if (listeners.contains(mlistener)) {
+                listeners.remove(mlistener);
+            }
+        }
+
+
+
     };
 
 
@@ -163,6 +182,7 @@ public class MyLocationService extends MyAbstractLocationService {
      */
     @Override
     public void onLocationChanged(Location location) {
+        Log.d(TAG, "-------------------onLocationChanged---------------------- ");
         updateCurrentLocation(location);
         sendLocationUpdate();
     }
@@ -182,6 +202,7 @@ public class MyLocationService extends MyAbstractLocationService {
                     location.getLatitude(), location.getLongitude(), 1);
 
             if (addresses != null && addresses.size() > 0) {
+                Log.d(TAG, "-------------------updateCurrentLocation---- new address received--------------------- ");
                 mAddress = addresses.get(0);
                 formatAddress(mAddress);
             }
@@ -191,10 +212,35 @@ public class MyLocationService extends MyAbstractLocationService {
         }
     }
 
+
+
+
     /**
      * Send location update to clients.
      */
-    private void sendLocationUpdate() {
+
+    private void sendLocationUpdate(){
+        Log.d(TAG, "-------------------sendLocationUpdate------------------------ ");
+        for (IMyLocationListener listener: listeners){
+            Log.d(TAG, "-------------------sending to all listeners--------------------- ");
+            try {
+                String sfine = fineGrainAddressText.toString();
+                String scoarse = fineGrainAddressText.toString();
+                if (isClientFineGradeListed()) {
+                    Log.e(TAG, "--------------------sending fine grained location to client " + sfine);
+                    listener.handleChangedLocation(sfine);
+
+                }else {
+                    Log.e(TAG, "--------------------sending coarse grained location to client " + scoarse);
+                    listener.handleChangedLocation(scoarse);
+
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    /*private void sendLocationUpdate() {
         Bundle fineBundle = new Bundle();
         Bundle coarseBundle = new Bundle();
 
@@ -232,7 +278,7 @@ public class MyLocationService extends MyAbstractLocationService {
 
         //Log.d(TAG, "Sent location update: '" + mAddress + "'");
     }
-
+*/
     /*
      * Format the address lines (if available), thoroughfare, sub-administrative
      * area and country name.
