@@ -95,7 +95,6 @@ public class MyLocationActivity extends Activity {
             Log.d(TAG, "handleChangedLocation ----------- newLocation: " +newLocation);
             if (newLocation.length()>0) {
                 Log.d(TAG, "Updating location--------------------------" );
-                //mCallbackText.setText(newLocation);
                 currentLocation = newLocation;
                 updateView();
             }
@@ -115,86 +114,7 @@ public class MyLocationActivity extends Activity {
         });
     }
 
-    /**
-     * Handler of incoming messages from service.
-     */
-    /*class IncomingHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MyLocationCommon.MSG_UPDATE_LOCATION:
-                    //Address address = msg.getData().getParcelable(
-                    //        MyLocationCommon.KEY_LOCATION_UPDATE_PARCELABLE);
-                    String location = msg.getData().getString(MyLocationCommon.KEY_LOCATION_UPDATE_STRING);
-                    if (location.length()>0) {
-                    //if (address != null) {
-                    //    String location = formatAddress(address);
-                        Log.d(TAG, "Received location update: '" + location + "'");
-                        mCallbackText.setText(location);
-                    } else {
-                        mCallbackText.setText(getString(R.string.field_locality_default));
-                    }
-                    break;
-                default:
-                    super.handleMessage(msg);
-            }
-        }
-    }
-*/
-    /**
-     * Target published for clients to send messages to IncomingHandler.
-     */
-   // private final Messenger mMessenger = new Messenger(new IncomingHandler());
 
-
-    /**
-     * Class for interacting with the main interface of the service.
-     */
-    /*private final ServiceConnection mConnection = new ServiceConnection() {
-        /*
-         * This is called when the connection with the service has been
-         * established, giving us the service object we can use to interact with
-         * the service. We are communicating with our service through an IDL
-         * interface, so get a client-side representation of that from the raw
-         * service object.
-         */
-      /*  @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            mService = new Messenger(service);
-            Log.d(TAG, "Connected to location service");
-
-            // We want to monitor the service for as long as we are connected to
-            // it
-            try {
-                Message msg = Message.obtain(null, MyLocationCommon.MSG_REGISTER_CLIENT);
-                msg.replyTo = mMessenger;
-                mService.send(msg);
-                Log.d(TAG, "Registered with location service");
-
-                // Trigger location update
-                msg = Message.obtain(null, MyLocationCommon.MSG_UPDATE_LOCATION);
-                mService.send(msg);
-                Log.d(TAG, "Triggered location update");
-            } catch (RemoteException e) {
-                /*
-                 * In this case the service has crashed before we could even do
-                 * anything with it; we can count on soon being disconnected
-                 * (and then reconnected if it can be restarted) so there is no
-                 * need to do anything here.
-                 */
-/*            }
-        }
-*/
-        /*
-         * This is called when the connection with the service has been
-         * unexpectedly disconnected -- that is, its process crashed.
-         */
-/*        @Override
-        public void onServiceDisconnected(ComponentName className) {
-            mService = null;
-        }
-    };
-*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -282,22 +202,6 @@ public class MyLocationActivity extends Activity {
      */
     void doUnbindService() {
         if (mIsBound) {
-            /*
-             * If we have received the service, and hence registered with it,
-             * then now is the time to unregister.
-             */
-            /*if (mService != null) {
-                try {
-                    Message msg = Message.obtain(null, MyLocationCommon.MSG_UNREGISTER_CLIENT);
-                    msg.replyTo = mMessenger;
-                    mService.send(msg);
-                    Log.d(TAG, "Unregistered with location service");
-                } catch (RemoteException e) {
-                    // There is nothing special we need to do if the service has
-                    // crashed.
-                }
-            }
-            */
             // Detach our existing connection.
             unbindService(mConnection);
             mIsBound = false;
@@ -305,44 +209,4 @@ public class MyLocationActivity extends Activity {
     }
 
 
-
-    /*
-     * Format the address lines (if available), thoroughfare, sub-administrative
-     * area and country name.
-     */
-    private String formatAddress(Address address) {
-        if (address == null) {
-            return null;
-        }
-
-        StringBuilder addressText = new StringBuilder();
-
-        // If there's a street address, use it...
-        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
-            addressText.append(address.getAddressLine(i));
-            addressText.append(' ');
-        }
-
-        // ..otherwise fall back to using any fields which might be available
-        if (address.getMaxAddressLineIndex() < 0) {
-            // The thoroughfare is usually the street name
-            if (address.getThoroughfare() != null) {
-                addressText.append(address.getThoroughfare());
-                addressText.append(' ');
-            }
-
-            // The sub-administrative area is usually a city
-            if (address.getSubAdminArea() != null) {
-                addressText.append(address.getSubAdminArea());
-                addressText.append(' ');
-            }
-
-            // The country of the address
-            if (address.getCountryName() != null)
-                addressText.append(address.getCountryName());
-        }
-
-        // Return the text
-        return addressText.toString();
-    }
 }

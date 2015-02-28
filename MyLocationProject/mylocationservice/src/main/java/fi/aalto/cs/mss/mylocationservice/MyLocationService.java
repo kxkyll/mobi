@@ -240,45 +240,7 @@ public class MyLocationService extends MyAbstractLocationService {
             }
         }
     }
-    /*private void sendLocationUpdate() {
-        Bundle fineBundle = new Bundle();
-        Bundle coarseBundle = new Bundle();
 
-        fineBundle.putString(MyLocationCommon.KEY_LOCATION_UPDATE_STRING,
-                String.valueOf(fineGrainAddressText));
-        coarseBundle.putString(MyLocationCommon.KEY_LOCATION_UPDATE_STRING,
-                String.valueOf(coarseGrainAddressText));
-
-
-        Message finemsg = Message
-                .obtain(null, MyLocationCommon.MSG_UPDATE_LOCATION);
-        finemsg.setData(fineBundle);
-
-        Message coarsemsg = Message
-                .obtain(null, MyLocationCommon.MSG_UPDATE_LOCATION);
-        coarsemsg.setData(coarseBundle);
-
-        for (int i = mClients.size() - 1; i >= 0; i--) {
-            try {
-                if (isClientFineGradeListed()){
-                    mClients.get(i).send(finemsg);
-                    Log.e(TAG, "sending fine grained location to client " + finemsg);
-                }else {
-                    mClients.get(i).send(coarsemsg);
-                    Log.e(TAG, "sending coarse grained location to client " + coarsemsg);
-                }
-
-            } catch (RemoteException e) {
-                // The client is dead. Remove it from the list;
-                // we are going through the list from back to front
-                // so this is safe to do inside the loop.
-                mClients.remove(i);
-            }
-        }
-
-        //Log.d(TAG, "Sent location update: '" + mAddress + "'");
-    }
-*/
     /*
      * Format the address lines (if available), thoroughfare, sub-administrative
      * area and country name.
