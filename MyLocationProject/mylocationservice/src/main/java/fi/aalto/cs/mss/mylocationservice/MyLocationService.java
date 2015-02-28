@@ -94,47 +94,14 @@ public class MyLocationService extends MyAbstractLocationService {
     };
 
 
-
-    /**
-     * Handler of incoming messages from clients.
-     */
-    class IncomingHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MyLocationCommon.MSG_REGISTER_CLIENT:
-                    mClients.add(msg.replyTo);
-
-                    Log.d(TAG, "Location client registered");
-                    break;
-                case MyLocationCommon.MSG_UNREGISTER_CLIENT:
-                    mClients.remove(msg.replyTo);
-                    Log.d(TAG, "Location client unregistered");
-                    break;
-                case MyLocationCommon.MSG_UPDATE_LOCATION:
-                    Log.d(TAG, "Received location update request");
-
-                    if (mGoogleApiClient.isConnected()) {
-                        Location location = LocationServices.FusedLocationApi.getLastLocation(
-                                mGoogleApiClient);
-                        updateCurrentLocation(location);
-                    }
-                    sendLocationUpdate();
-                    break;
-                default:
-                    super.handleMessage(msg);
-            }
-        }
-    }
-
     private boolean isClientFineGradeListed() {
-        return true;
+        return false;
     }
 
     /**
      * Target we publish for clients to send messages to IncomingHandler.
      */
-    final Messenger mMessenger = new Messenger(new IncomingHandler());
+  //  final Messenger mMessenger = new Messenger(new IncomingHandler());
 
     @Override
     public void onCreate() {
@@ -225,9 +192,10 @@ public class MyLocationService extends MyAbstractLocationService {
             Log.d(TAG, "-------------------sending to all listeners--------------------- ");
             try {
                 String sfine = fineGrainAddressText.toString();
-                String scoarse = fineGrainAddressText.toString();
+                String scoarse = coarseGrainAddressText.toString();
                 if (isClientFineGradeListed()) {
                     Log.e(TAG, "--------------------sending fine grained location to client " + sfine);
+
                     listener.handleChangedLocation(sfine);
 
                 }else {
