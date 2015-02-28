@@ -42,13 +42,6 @@ import fi.aalto.mss.mylocationcommon.IMyLocationServiceInterface;
 
 public class MyLocationService extends MyAbstractLocationService {
 
-    private IMyLocationServiceInterface.Stub mBinder = new IMyLocationServiceInterface.Stub() {
-        public String locationRequest() {
-            return "huuhaa";
-        }
-    };
-
-
     // Tag used for log message
     private static final String TAG = "MyLocationService";
 
@@ -60,10 +53,28 @@ public class MyLocationService extends MyAbstractLocationService {
 
     private StringBuilder fineGrainAddressText = new StringBuilder();
     private StringBuilder coarseGrainAddressText = new StringBuilder();
-    
 
     /** Geocoder instance used to perform reverse geocoding */
     private Geocoder geocoder;
+
+    private IMyLocationServiceInterface.Stub mBinder = new IMyLocationServiceInterface.Stub() {
+        public String locationRequest() {
+            if (mGoogleApiClient.isConnected()) {
+                Log.d(TAG, "Google Api Client is connected");
+                Location location = LocationServices.FusedLocationApi.getLastLocation(
+                        mGoogleApiClient);
+                updateCurrentLocation(location);
+            }
+            if (isClientFineGradeListed()){
+                return fineGrainAddressText.toString();
+            }else {
+                return coarseGrainAddressText.toString();
+            }
+
+        }
+    };
+
+
 
     /**
      * Handler of incoming messages from clients.
@@ -98,7 +109,7 @@ public class MyLocationService extends MyAbstractLocationService {
     }
 
     private boolean isClientFineGradeListed() {
-        return false;
+        return true;
     }
 
     /**
@@ -110,6 +121,8 @@ public class MyLocationService extends MyAbstractLocationService {
     public void onCreate() {
         Log.d(TAG, "Service starting");
         super.onCreate();
+        fineGrainAddressText.append("Seeking exact location");
+        coarseGrainAddressText.append("Seeking city location");
 
         // Initialize Geocoder instance used retrieve the the current address
         geocoder = new Geocoder(this, Locale.getDefault());
