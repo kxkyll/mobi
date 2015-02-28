@@ -1,35 +1,40 @@
-Programming assignment 2
-========================
+Mobile Systems Security
+Kati Kyllönen
+Programming Assignment 3
 
-In order to provide the separation of privileges described in the assignment
-description, the service and client are separated into two distinct
-applications; `MyLocationService` and `MyLocationApp`.
+Done on top of Programming Assignment 2 model answer.
 
-Communication between the two occurs via two `Messenger` instances. The client
-receives a handle to the service `Messenger` `Binder` interface when binding to
-the service. The service is started automatically by the Android system when the
-first client binds to it. Binding to the service is restricted via a dangerous
-level `fi.aalto.mss.permission.ACCESS_AGGREGATED_LOCATION` permission.
+Contains:
 
-The message interface between the service and client is defined in a separate
-library module `mylocationcommon`, referenced by both the service and client
-apps.
+mylocationservice - service that provides fine or coarse location data 
+mylocationcommons - commons as in Assignment 2 - added aidl files
+mylocationapp - client that connects to service via aidl
+mycoarselocationapp- client that connects to service via aidl
 
-When the client registers to receive location updates, it passes a reference to
-a `Messenger` instance of its own the service can subsequently use to reply to
-the client. The service maintains a list of reply handles to registered clients.
-Concurrent requests are placed in a work queue and processed one-by-one. The
-service performs reverse geocoding of the location coordinates and passes the
-resolved address to client as a `Parcelable` attached to the replied message.
-Changes in location are passed to each registered client as the service receives
-new coordinates. Clients may unregister at any time by sending a message to
-indicate this to the service. Once all clients have unregistered, the service
-automatically ceases execution. 
+Description:
 
-Deployment notes
-----------------
+The service has a list of application uid's that can have fine grain location info
+this is hardcoded at the moment
 
-In order to ensure that the permission required to bind to the service is
-defined at the time the `MyLocationApp` is installed, make sure the deploy the
-`MyLocationService` to the device before `MyLocationApp`.
+The application uid can be clarified after it has been installed 
+eg. in emulator case one can check it from the visual studio terminal window 
+with command:
+adb shell dumpsys package fi.aalto.cs.mss.mylocationapp | grep userId=
+userId=10066 gids=[]
+
+In my case the userid of mylocationapp was: 10066 and this is currently initialized when service is created
+
+The other client mycoarselocationapp get's only the city level location info
+
+The solution is a bit coarse as it has hardcoded values, but it fullfills 
+all requirements.
+
+When client registeres the service checks the uid of the caller and saves it 
+to list. Every time the location info is updated the service checks if the 
+client can get fine or coarse level location data.
+
+When both clients are installed, the one that is active is served by the 
+service.
+ 
+
 

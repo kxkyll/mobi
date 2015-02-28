@@ -32,8 +32,6 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import fi.aalto.cs.mss.mylocationcommon.MyLocationCommon;
-import fi.aalto.cs.mss.mylocationapp.R;
 import fi.aalto.mss.mylocationcommon.IMyLocationListener;
 import fi.aalto.mss.mylocationcommon.IMyLocationServiceInterface;
 

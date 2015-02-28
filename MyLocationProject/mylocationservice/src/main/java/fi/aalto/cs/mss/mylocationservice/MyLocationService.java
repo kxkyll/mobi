@@ -38,8 +38,6 @@ import java.util.Locale;
 import com.google.android.gms.location.LocationServices;
 
 import fi.aalto.cs.mss.mylocationcommon.LocationClient;
-import fi.aalto.cs.mss.mylocationcommon.MyLocationCommon;
-import fi.aalto.cs.mss.mylocationservice.MyAbstractLocationService;
 import fi.aalto.mss.mylocationcommon.IMyLocationListener;
 import fi.aalto.mss.mylocationcommon.IMyLocationServiceInterface;
 
@@ -60,7 +58,6 @@ public class MyLocationService extends MyAbstractLocationService {
     /** Geocoder instance used to perform reverse geocoding */
     private Geocoder geocoder;
 
-    private List<IMyLocationListener> listeners = new ArrayList<IMyLocationListener>();
     private List<LocationClient> locationListeners = new ArrayList<LocationClient>();
     private List<Integer> fineGrainListed = new ArrayList<Integer>();
 
@@ -77,6 +74,7 @@ public class MyLocationService extends MyAbstractLocationService {
                 Location location = LocationServices.FusedLocationApi.getLastLocation(
                         mGoogleApiClient);
                 updateCurrentLocation(location);
+
             }
             if (isClientFineGradeListed(Binder.getCallingPid())){
                 Log.d(TAG, "sending location as response to locationRequest "+fineGrainAddressText.toString());
@@ -91,8 +89,10 @@ public class MyLocationService extends MyAbstractLocationService {
 
             int callingUid = Binder.getCallingUid();
             LocationClient client = new LocationClient(mlistener, callingUid);
+
+
             locationListeners.add(client);
-            //listeners.add(mlistener);
+
             Log.d(TAG, "locationListeners has this many listeners: " +locationListeners.size());
             Log.d(TAG, "Binder.getCallingUid returned: "+callingUid);
 
@@ -234,30 +234,6 @@ public class MyLocationService extends MyAbstractLocationService {
         }
     }
 
-
-    /*private void sendLocationUpdate(){
-        Log.d(TAG, "-------------------sendLocationUpdate------------------------ ");
-        for (IMyLocationListener listener: listeners){
-            Log.d(TAG, "-------------------sending to all listeners--------------------- ");
-            try {
-                String sfine = fineGrainAddressText.toString();
-                String scoarse = coarseGrainAddressText.toString();
-                if (isClientFineGradeListed()) {
-                    Log.e(TAG, "--------------------sending fine grained location to client " + sfine);
-
-                    listener.handleChangedLocation(sfine);
-
-                }else {
-                    Log.e(TAG, "--------------------sending coarse grained location to client " + scoarse);
-                    listener.handleChangedLocation(scoarse);
-
-                }
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-*/
     /*
      * Format the address lines (if available), thoroughfare, sub-administrative
      * area and country name.

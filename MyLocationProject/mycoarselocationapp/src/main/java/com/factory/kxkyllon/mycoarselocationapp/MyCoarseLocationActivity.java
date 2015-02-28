@@ -15,8 +15,6 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import fi.aalto.cs.mss.mylocationcommon.MyLocationCommon;
-import com.factory.kxkyllon.mycoarselocationapp.R;
 import fi.aalto.mss.mylocationcommon.IMyLocationListener;
 import fi.aalto.mss.mylocationcommon.IMyLocationServiceInterface;
 
@@ -26,9 +24,6 @@ public class MyCoarseLocationActivity extends Activity {
     private IMyLocationServiceInterface mService;
 
     private static final String TAG = "MyLocationApp";
-
-    /** Messenger for communicating with service. */
-    //private Messenger mService = null;
 
     /** Flag indicating whether we have called bind on the service. */
     private boolean mIsBound;
